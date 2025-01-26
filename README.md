@@ -20,7 +20,7 @@ Welcome to **ZERO's Virtual Downloads**! This is a personal website hosted on Gi
    - **Password**: `download123`
    - **Email**: `global@downloads.com`
 
-Once logged in, you'll be able to view and download files. Admin users can also upload files to the website.
+Once logged in, you'll be able to view and download files. Admin users can also upload files to the website but it doesn't work well. The best way to upload is to commit in the repo.
 
 ## How It Works
 
