@@ -7,18 +7,20 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script>
         const users = [
-            { username: 'admin', password: 'admin', email: 'rojavanda8@gmail.com', canUpload: true }
+            { username: 'admin', passwordHash: 'd033e22ae348aeb5660fc2140aec35850c4da997', email: 'rojavanda8@gmail.com', canUpload: true } // Example hashed password (md5 of 'admin')
         ];
 
         let currentUser = null;
 
-        function signIn(event) {
+        async function signIn(event) {
             event.preventDefault();
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
             const email = document.getElementById('email').value.trim();
 
-            const user = users.find(u => u.username === username && u.password === password && u.email === email);
+            const hashedPassword = await hashPassword(password);
+
+            const user = users.find(u => u.username === username && u.passwordHash === hashedPassword && u.email === email);
 
             if (user) {
                 currentUser = user;
@@ -27,9 +29,47 @@
                 if (user.canUpload) {
                     document.getElementById('upload-section').classList.remove('hidden');
                 }
+                loadFiles(); // Load files after sign-in
             } else {
                 alert('Invalid credentials. Please try again.');
             }
+        }
+
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return bufferToHex(hashBuffer);
+        }
+
+        function bufferToHex(buffer) {
+            return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+        }
+
+        function loadFiles() {
+            const repoUrl = 'https://api.github.com/repos/z3r0265/z3r0265.github.io/contents/';
+            fetch(repoUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const filesContainer = document.getElementById('files-container');
+                    filesContainer.innerHTML = ''; // Clear any existing files
+                    data.forEach(file => {
+                        if (file.type === 'file' && file.name !== 'index.html' && file.name !== 'README.md') {
+                            const fileElement = document.createElement('div');
+                            fileElement.classList.add('bg-white', 'rounded-2xl', 'shadow-lg', 'p-4', 'hover:shadow-xl', 'transition');
+                            fileElement.innerHTML = `
+                                <h2 class="text-xl font-semibold">${file.name}</h2>
+                                <p class="mt-2 text-gray-600">A brief description of the file or resource available for download.</p>
+                                <a href="${file.download_url}" class="inline-block mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Download</a>
+                            `;
+                            filesContainer.appendChild(fileElement);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading files:', error);
+                    alert('Failed to load files.');
+                });
         }
 
         function uploadFile(event) {
@@ -73,25 +113,7 @@
         </form>
 
         <div id="main-content" class="hidden">
-            <section class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                <div class="bg-white rounded-2xl shadow-lg p-4 hover:shadow-xl transition">
-                    <h2 class="text-xl font-semibold">File 1</h2>
-                    <p class="mt-2 text-gray-600">A brief description of the file or resource available for download.</p>
-                    <a href="your-file-link-1" class="inline-block mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Download</a>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-lg p-4 hover:shadow-xl transition">
-                    <h2 class="text-xl font-semibold">File 2</h2>
-                    <p class="mt-2 text-gray-600">Another description for this downloadable resource.</p>
-                    <a href="your-file-link-2" class="inline-block mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Download</a>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-lg p-4 hover:shadow-xl transition">
-                    <h2 class="text-xl font-semibold">File 3</h2>
-                    <p class="mt-2 text-gray-600">A brief description for this downloadable item.</p>
-                    <a href="your-file-link-3" class="inline-block mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Download</a>
-                </div>
-            </section>
+            <section id="files-container" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"></section>
 
             <section id="upload-section" class="hidden mt-6">
                 <form class="bg-white p-6 rounded-2xl shadow-lg max-w-md mx-auto" onsubmit="uploadFile(event)">
