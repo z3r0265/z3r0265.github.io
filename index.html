@@ -7,59 +7,19 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script>
         const users = [
-            { username: 'admin', passwordHash: 'd033e22ae348aeb5660fc2140aec35850c4da997', email: 'rojavanda8@gmail.com', canUpload: true } // Example hashed password (md5 of 'admin')
+            { username: 'admin', password: 'admin', email: 'rojavanda8@gmail.com', canUpload: true },
+            { username: 'Global Download', password: 'download123', email: 'global@downloads.com', canUpload: false }
         ];
 
         let currentUser = null;
 
-        // Predefined IP addresses for auto-login
-        const allowedIps = [
-            { ip: '2607:fea8:be3:2b00:9c15:ab78:68fa:5a76', type: 'IPv6' },
-            { ip: '99.234.4.39', type: 'IPv4' }
-        ];
-
-        // Function to check if the user IP matches the predefined ones
-        function checkAutoLogin(ip) {
-            return allowedIps.some(allowedIp => allowedIp.ip === ip);
-        }
-
-        // Function to fetch the user's IP address using an external service
-        async function getUserIp() {
-            try {
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
-                const userIp = data.ip; // This will return the public IP address
-
-                if (checkAutoLogin(userIp)) {
-                    autoLogin();
-                } else {
-                    document.getElementById('sign-in-form').classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('Error getting IP address:', error);
-            }
-        }
-
-        // Auto-login based on IP match
-        function autoLogin() {
-            currentUser = users.find(u => u.username === 'admin');
-            document.getElementById('sign-in-form').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            if (currentUser.canUpload) {
-                document.getElementById('upload-section').classList.remove('hidden');
-            }
-            loadFiles(); // Load files after auto-login
-        }
-
-        async function signIn(event) {
+        function signIn(event) {
             event.preventDefault();
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
             const email = document.getElementById('email').value.trim();
 
-            const hashedPassword = await hashPassword(password);
-
-            const user = users.find(u => u.username === username && u.passwordHash === hashedPassword && u.email === email);
+            const user = users.find(u => u.username === username && u.password === password && u.email === email);
 
             if (user) {
                 currentUser = user;
@@ -72,17 +32,6 @@
             } else {
                 alert('Invalid credentials. Please try again.');
             }
-        }
-
-        async function hashPassword(password) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            return bufferToHex(hashBuffer);
-        }
-
-        function bufferToHex(buffer) {
-            return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
         }
 
         function loadFiles() {
@@ -110,26 +59,6 @@
                     alert('Failed to load files.');
                 });
         }
-
-        function uploadFile(event) {
-            event.preventDefault();
-            const fileInput = document.getElementById('file');
-
-            if (currentUser && currentUser.canUpload) {
-                if (fileInput.files.length > 0) {
-                    alert(`File "${fileInput.files[0].name}" uploaded successfully!`);
-                    fileInput.value = ''; // Clear file input
-                } else {
-                    alert('Please select a file to upload.');
-                }
-            } else {
-                alert('You do not have permission to upload files.');
-            }
-        }
-
-        // Automatically check the user's IP when the page loads
-        window.onload = getUserIp;
-
     </script>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -157,15 +86,6 @@
 
         <div id="main-content" class="hidden">
             <section id="files-container" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"></section>
-
-            <section id="upload-section" class="hidden mt-6">
-                <form class="bg-white p-6 rounded-2xl shadow-lg max-w-md mx-auto" onsubmit="uploadFile(event)">
-                    <h2 class="text-xl font-semibold mb-4">Upload File</h2>
-                    <label for="file" class="block text-gray-600 mb-2">Select File</label>
-                    <input type="file" id="file" class="w-full border-gray-300 rounded-lg p-2 mb-4" required>
-                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Upload</button>
-                </form>
-            </section>
         </div>
     </main>
 
