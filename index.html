@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>z3r0's Virtual Downloads</title>
+    <title>Z3r0's Virtual Downloads</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="icon" href="favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="favicon-48x48.png" sizes="48x48" type="image/png">
     <script>
         const users = [
             { username: 'admin', password: 'admin', email: 'rojavanda8@gmail.com', canUpload: true },
-            { username: 'Global Download', password: 'download', email: '', canUpload: false }
+            { username: 'Global Download', password: '', email: '', canUpload: false }
         ];
 
         let currentUser = null;
-
-        // Check localStorage for dark mode preference
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.documentElement.classList.add('dark');
-        }
 
         function signIn(event) {
             event.preventDefault();
@@ -33,7 +31,7 @@
                 if (user.canUpload) {
                     document.getElementById('upload-section').classList.remove('hidden');
                 }
-                loadFiles(); // Load files after sign-in
+                loadFiles();
             } else {
                 alert('Invalid credentials. Please try again.');
             }
@@ -45,9 +43,12 @@
                 .then(response => response.json())
                 .then(data => {
                     const filesContainer = document.getElementById('files-container');
-                    filesContainer.innerHTML = ''; // Clear any existing files
+                    filesContainer.innerHTML = '';
                     data.forEach(file => {
-                        if (file.type === 'file' && file.name !== 'index.html' && file.name !== 'README.md') {
+                        // Exclude certain files like index.html, README.md, and favicon images
+                        if (file.type === 'file' && 
+                            (file.name.endsWith('.zip') || 
+                            (file.name !== 'index.html' && file.name !== 'README.md' && !file.name.startsWith('favicon-')))) {
                             const fileElement = document.createElement('div');
                             fileElement.classList.add('bg-white', 'rounded-2xl', 'shadow-lg', 'p-4', 'hover:shadow-xl', 'transition', 'dark:bg-gray-800');
                             fileElement.innerHTML = `
@@ -72,7 +73,7 @@
             if (currentUser && currentUser.canUpload) {
                 if (fileInput.files.length > 0) {
                     alert(`File "${fileInput.files[0].name}" uploaded successfully!`);
-                    fileInput.value = ''; // Clear file input
+                    fileInput.value = '';
                 } else {
                     alert('Please select a file to upload.');
                 }
@@ -81,50 +82,45 @@
             }
         }
 
-        // Toggle dark mode
         function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            localStorage.setItem('darkMode', isDarkMode); // Save user preference in localStorage
+            const body = document.body;
+            body.classList.toggle('dark');
         }
     </script>
 </head>
-<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
-    <header class="bg-blue-600 text-white py-4 shadow-md dark:bg-blue-800">
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white">
+    <header class="bg-blue-600 text-white py-4 shadow-md">
         <div class="container mx-auto text-center">
-            <h1 class="text-3xl font-bold">z3r0's Virtual Downloads</h1>
+            <h1 class="text-3xl font-bold">Z3r0's Virtual Downloads</h1>
             <p class="text-sm">A central hub for your downloadable content</p>
-            <!-- Dark Mode Toggle Button -->
-            <button onclick="toggleDarkMode()" class="mt-2 py-2 px-4 bg-gray-200 rounded-md text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">
-                Toggle Dark Mode (Badly Implemented)
-            </button>
+            <button onclick="toggleDarkMode()" class="mt-2 bg-gray-800 text-white py-2 px-4 rounded-lg hover:bg-gray-700">Toggle Dark Mode</button>
         </div>
     </header>
 
     <main class="container mx-auto mt-6 p-4">
-        <form id="sign-in-form" class="bg-white p-6 rounded-2xl shadow-lg max-w-md mx-auto dark:bg-gray-800 dark:text-gray-200" onsubmit="signIn(event)">
+        <form id="sign-in-form" class="bg-white p-6 rounded-2xl shadow-lg max-w-md mx-auto" onsubmit="signIn(event)">
             <h2 class="text-xl font-semibold mb-4">Sign In</h2>
-            <label for="username" class="block text-gray-600 dark:text-gray-300 mb-2">Username</label>
-            <input type="text" id="username" class="w-full border-gray-300 rounded-lg p-2 mb-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
+            <label for="username" class="block text-gray-600 mb-2">Username</label>
+            <input type="text" id="username" class="w-full border-gray-300 rounded-lg p-2 mb-4" required>
 
-            <label for="password" class="block text-gray-600 dark:text-gray-300 mb-2">Password</label>
-            <input type="password" id="password" class="w-full border-gray-300 rounded-lg p-2 mb-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
+            <label for="password" class="block text-gray-600 mb-2">Password</label>
+            <input type="password" id="password" class="w-full border-gray-300 rounded-lg p-2 mb-4" required>
 
-            <label for="email" class="block text-gray-600 dark:text-gray-300 mb-2">Email</label>
-            <input type="email" id="email" class="w-full border-gray-300 rounded-lg p-2 mb-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
+            <label for="email" class="block text-gray-600 mb-2">Email</label>
+            <input type="email" id="email" class="w-full border-gray-300 rounded-lg p-2 mb-4">
 
-            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">Sign In</button>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Sign In</button>
         </form>
 
         <div id="main-content" class="hidden">
             <section id="files-container" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"></section>
 
             <section id="upload-section" class="hidden mt-6">
-                <form class="bg-white p-6 rounded-2xl shadow-lg max-w-md mx-auto dark:bg-gray-800 dark:text-gray-200" onsubmit="uploadFile(event)">
+                <form class="bg-white p-6 rounded-2xl shadow-lg max-w-md mx-auto" onsubmit="uploadFile(event)">
                     <h2 class="text-xl font-semibold mb-4">Upload File</h2>
-                    <label for="file" class="block text-gray-600 dark:text-gray-300 mb-2">Select File</label>
-                    <input type="file" id="file" class="w-full border-gray-300 rounded-lg p-2 mb-4 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
-                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">Upload</button>
+                    <label for="file" class="block text-gray-600 mb-2">Select File</label>
+                    <input type="file" id="file" class="w-full border-gray-300 rounded-lg p-2 mb-4" required>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Upload</button>
                 </form>
             </section>
         </div>
@@ -132,7 +128,7 @@
 
     <footer class="bg-gray-800 text-white py-4 mt-8">
         <div class="container mx-auto text-center">
-            <p>&copy; 2025 z3r0's Virtual Downloads. Hosted on <a href="https://pages.github.com/" class="text-blue-400 hover:underline">GitHub Pages</a>.</p>
+            <p>&copy; 2025 Z3r0's Virtual Downloads. Hosted on <a href="https://pages.github.com/" class="text-blue-400 hover:underline">GitHub Pages</a>.</p>
         </div>
     </footer>
 </body>
