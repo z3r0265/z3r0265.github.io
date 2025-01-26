@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script>
         const users = [
-            { username: 'admin', passwordHash: 'd033e22ae348aeb5660fc2140aec35850c4da997', email: 'rojavanda8@gmail.com', canUpload: true } // Example hashed password (md5 of 'admin')
+            { username: 'admin', passwordHash: 'd033e22ae348aeb5660fc2140aec35850c4da997', email: 'rojavanda8@gmail.com', canUpload: true }
         ];
 
         let currentUser = null;
@@ -29,7 +29,7 @@
                 if (user.canUpload) {
                     document.getElementById('upload-section').classList.remove('hidden');
                 }
-                loadFiles(); // Load files after sign-in
+                loadFiles();
             } else {
                 alert('Invalid credentials. Please try again.');
             }
@@ -79,7 +79,7 @@
             if (currentUser && currentUser.canUpload) {
                 if (fileInput.files.length > 0) {
                     alert(`File "${fileInput.files[0].name}" uploaded successfully!`);
-                    fileInput.value = ''; // Clear file input
+                    fileInput.value = '';
                 } else {
                     alert('Please select a file to upload.');
                 }
