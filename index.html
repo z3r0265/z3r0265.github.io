@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z3r0's Virtual Downloads</title>
+
+    <!-- Favicon links with versioning -->
+    <link rel="icon" href="favicon-16x16.png?v=1" type="image/png" sizes="16x16">
+    <link rel="icon" href="favicon-32x32.png?v=1" type="image/png" sizes="32x32">
+    <link rel="icon" href="favicon-48x48.png?v=1" type="image/png" sizes="48x48">
+
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script>
         const users = [
@@ -23,17 +29,13 @@
 
             if (user) {
                 currentUser = user;
-                if (user.username === 'admin') {
-                    // Save login state to cookies for 100 years (approximately 3.15576e9 seconds)
-                    document.cookie = "adminLoggedIn=true;path=/;max-age=" + (100 * 365 * 24 * 60 * 60);  // 100 years
-                }
-
                 document.getElementById('sign-in-form').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
                 if (user.canUpload) {
                     document.getElementById('upload-section').classList.remove('hidden');
                 }
                 loadFiles();
+                setLoginPersistence(user.username);
             } else {
                 alert('Invalid credentials. Please try again.');
             }
@@ -88,18 +90,31 @@
             body.classList.toggle('dark');
         }
 
-        // Check for existing admin login cookie
-        window.onload = () => {
-            if (document.cookie.indexOf("adminLoggedIn=true") !== -1) {
-                currentUser = users.find(u => u.username === 'admin');
-                document.getElementById('sign-in-form').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                if (currentUser && currentUser.canUpload) {
-                    document.getElementById('upload-section').classList.remove('hidden');
+        function setLoginPersistence(username) {
+            const expirationDate = new Date();
+            expirationDate.setFullYear(expirationDate.getFullYear() + 100); // Set to expire in 100 years
+            document.cookie = `loggedInUser=${username}; expires=${expirationDate.toUTCString()}; path=/`;
+        }
+
+        function checkLoginPersistence() {
+            const cookies = document.cookie.split('; ');
+            const loggedInUserCookie = cookies.find(cookie => cookie.startsWith('loggedInUser='));
+            if (loggedInUserCookie) {
+                const loggedInUser = loggedInUserCookie.split('=')[1];
+                const user = users.find(u => u.username === loggedInUser);
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('sign-in-form').classList.add('hidden');
+                    document.getElementById('main-content').classList.remove('hidden');
+                    if (user.canUpload) {
+                        document.getElementById('upload-section').classList.remove('hidden');
+                    }
+                    loadFiles();
                 }
-                loadFiles();
             }
-        };
+        }
+
+        window.onload = checkLoginPersistence;
     </script>
 </head>
 <body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white">
